@@ -1,6 +1,7 @@
 package com.riwi.beautySalon.infraestructure.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.riwi.beautySalon.api.dto.request.LoginReq;
@@ -24,10 +25,13 @@ public class AuthServices implements IAuthService{
     @Autowired
     private final JwtService jwtService;
 
+    //Esto lo usaremos para encriptar la contraseña para que el desarrollador no vea la contraseña de los clientes
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     public AuthResp login(LoginReq request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'login'");
+        
     }
 
     @Override
@@ -39,10 +43,11 @@ public class AuthServices implements IAuthService{
             throw new BadRequestException("El usuario ya existe");
         }
 
-        /*Construir el usuario */
+        /*Construir el nuevo usuario */
         User user = User.builder()
                         .userName(request.getUserName())
-                        .password(request.getPassword())
+                        //Guardar la contraseña codificada 
+                        .password(passwordEncoder.encode(request.getPassword()))
                         .role(Role.CLIENT)
                         .build();
 

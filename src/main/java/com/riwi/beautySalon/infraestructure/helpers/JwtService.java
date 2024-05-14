@@ -3,6 +3,7 @@ package com.riwi.beautySalon.infraestructure.helpers;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 //de aca debe de venir: SecretKey
 import javax.crypto.SecretKey;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.riwi.beautySalon.domain.entities.User;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -36,6 +38,7 @@ public class JwtService {
     //3. Construit el JWT
     public String getToken(Map<String, Object> claims, User user){
 
+        //Los claims son el cuerpo de el JWT
         return Jwts.builder()
                     .claims(claims) //Agrego el cuerpo del jwt
                     .subject(user.getUsername()) //Agrego de quien es el JWT
@@ -64,5 +67,42 @@ public class JwtService {
 
         //como el es inteligente mira la cantidad de argumentos que le pasamos al sobre escribir para saber cual de los metodos debe de utilizar
         return getToken(claims, user);
+    }
+
+    /*
+     * Metodo para obtener todos los claims
+     */
+    public Claims getAllClaims(String token){
+        return Jwts
+            .parser() //Desarmamos el JWT
+            .verifyWith(this.getKey()) //Validamos la firma de el servidor
+            .build() //Construimos
+            .parseSignedClaims(token) //Convertir de base64 a json el payload
+            .getPayload(); //Extraemos la info de el payload(Cuerpo de el JWT)
+    }
+
+
+    /*
+     * Metodo para obtener un Claim individualmente
+     * Recibe como parametro el token, y el claim a buscar
+     */
+    public <T> T getClaim(String token, Function<Claims, T> claimsResolver){
+
+        final Claims claims = this.getAllClaims(token);
+
+        return claimsResolver.apply(claims);
+    }
+
+    /*
+     * Se encarga de extraer de el token el sujeto, osea de el dueño de el token
+     */
+    public String getUsernameFromToken(String token){
+
+        return this.getClaim(token, Claims::getSubject);
+    }
+
+    public Date getExpiration(String token){
+
+        return this.getClaim(token, Claims::getExpiration);
     }
 }
