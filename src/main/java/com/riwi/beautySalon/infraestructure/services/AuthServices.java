@@ -1,6 +1,8 @@
 package com.riwi.beautySalon.infraestructure.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +31,26 @@ public class AuthServices implements IAuthService{
     @Autowired
     private final PasswordEncoder passwordEncoder;
     
+    @Autowired
+    private final AuthenticationManager authenticationManager;
+
     @Override
     public AuthResp login(LoginReq request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'login'");
+        
+        try {
+            //Autenticarnos en la app
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword()));
+
+        } catch (Exception e) {
+            throw new BadRequestException("Credenciales incorrectas");
+        }
+
+        User user = this.findUser(request.getUserName());
+
+        return AuthResp.builder()
+                .message("Autenticado correctamente")
+                .token(this.jwtService.getToken(user))
+                .build();
     }
 
     @Override

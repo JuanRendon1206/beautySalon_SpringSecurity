@@ -8,6 +8,7 @@ import java.util.function.Function;
 //de aca debe de venir: SecretKey
 import javax.crypto.SecretKey;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.riwi.beautySalon.domain.entities.User;
@@ -74,11 +75,11 @@ public class JwtService {
      */
     public Claims getAllClaims(String token){
         return Jwts
-            .parser() //Desarmamos el JWT
-            .verifyWith(this.getKey()) //Validamos la firma de el servidor
-            .build() //Construimos
-            .parseSignedClaims(token) //Convertir de base64 a json el payload
-            .getPayload(); //Extraemos la info de el payload(Cuerpo de el JWT)
+                .parser() //Desarmamos el JWT
+                .verifyWith(this.getKey()) //Validamos la firma de el servidor
+                .build() //Construimos
+                .parseSignedClaims(token) //Convertir de base64 a json el payload
+                .getPayload(); //Extraemos la info de el payload(Cuerpo de el JWT)
     }
 
 
@@ -88,8 +89,10 @@ public class JwtService {
      */
     public <T> T getClaim(String token, Function<Claims, T> claimsResolver){
 
+        //Obtener todos los claims
         final Claims claims = this.getAllClaims(token);
 
+        //Retornar el que me pide la funcion, le aplicamos a los claims lo que estamos buscando
         return claimsResolver.apply(claims);
     }
 
@@ -104,5 +107,19 @@ public class JwtService {
     public Date getExpiration(String token){
 
         return this.getClaim(token, Claims::getExpiration);
+    }
+
+    // Metodo para validar si el token esta espirado
+    public boolean isTokenExpired(String token){
+
+        return this.getExpiration(token).before(new Date());
+    }
+
+    //Metodo para validar si el token es valido
+    public boolean isTokenValid(String token, UserDetails user){
+        String userName = this.getUsernameFromToken(token);
+
+        //Si el usuario que viene en el token coincide con alguno de la DB y ademas el token no esta expirado entonces es valido
+        return userName.equals(user.getUsername()) && ! this.isTokenExpired(token);
     }
 }
