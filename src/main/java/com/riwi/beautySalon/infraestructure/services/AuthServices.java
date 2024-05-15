@@ -28,10 +28,11 @@ public class AuthServices implements IAuthService{
     //Esto lo usaremos para encriptar la contraseña para que el desarrollador no vea la contraseña de los clientes
     @Autowired
     private final PasswordEncoder passwordEncoder;
-
+    
     @Override
     public AuthResp login(LoginReq request) {
-        
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'login'");
     }
 
     @Override
@@ -47,7 +48,7 @@ public class AuthServices implements IAuthService{
         User user = User.builder()
                         .userName(request.getUserName())
                         //Guardar la contraseña codificada 
-                        .password(passwordEncoder.encode(request.getPassword()))
+                        .password(this.passwordEncoder.encode(request.getPassword()))
                         .role(Role.CLIENT)
                         .build();
 

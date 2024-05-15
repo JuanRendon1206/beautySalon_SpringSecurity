@@ -7,14 +7,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.riwi.beautySalon.domain.repositories.UserRepository;
-import com.riwi.beautySalon.utils.exceptions.BadRequestException;
 
 import lombok.AllArgsConstructor;
 
@@ -42,6 +40,7 @@ public class ApplicationConfig {
      */
     @Bean
     public AuthenticationProvider authenticationProvider(){
+        //Puedo usar var y el interfiere para saber de que tipo es 
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 
         authenticationProvider.setPasswordEncoder(this.passwordEncoder());
@@ -54,7 +53,7 @@ public class ApplicationConfig {
     //Este es un metodo que se encargara de traer los detalles de el usuario durante la autenticacion; para utilizarlo en authenticationProvider .
     @Bean
     public UserDetailsService userDetailsService(){
-        return username -> userRepository.findByUserName(username)
+        return username -> this.userRepository.findByUserName(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
