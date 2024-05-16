@@ -46,7 +46,7 @@ public class ApplicationConfig {
         authenticationProvider.setPasswordEncoder(this.passwordEncoder());
         authenticationProvider.setUserDetailsService(this.userDetailsService());
 
-        return authenticationProvider();
+        return authenticationProvider;
     }
 
 
